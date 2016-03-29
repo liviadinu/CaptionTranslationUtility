@@ -1,15 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CaptionTranslationUtility.TerminologyService;
+using System;
 using System.Net;
-using CaptionTranslationUtility.TerminologyService;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CaptionTranslationUtility
 {
     class MSApiTranslation
     {
+        private TerminologyClient service;
+        private TranslationSources translationSources;
+        private SearchStringComparison sensitivity;
+
+        public MSApiTranslation() {
+            // Create a collection to define the desired sources of translations 
+            translationSources = new TranslationSources() { TranslationSource.Terms, TranslationSource.UiStrings };
+
+            sensitivity = new SearchStringComparison();
+
+            // Create the proxy for the Terminology Service SOAP client 
+            service = new TerminologyClient();            
+        }
+
         public string TranslateText(string input, string languagePair)
         {
             // Summary : Translate Text using Google Translate API's
@@ -39,10 +49,8 @@ namespace CaptionTranslationUtility
 
         }
 
-        public string InitServiceCall(TerminologyClient service, TranslationSources translationSources, SearchStringComparison sensitivity, string line, string fromLang, string toLang, Products products)
+        public string InitServiceCall(string line, string fromLang, string toLang, Products products)
         {
-        
-
             try
             {
                 Matches results = service.GetTranslations(line, fromLang, toLang, sensitivity, SearchOperator.Exact, translationSources, false, 1, true, products);
@@ -86,6 +94,11 @@ namespace CaptionTranslationUtility
             }
 
             return null;
+        }
+
+        public void CloseTerminologyClientService()
+        {
+            service.Close();
         }
     }
 }

@@ -1,75 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CaptionTranslationUtility
 {
-    class TextProcessing
+    public static class TextProcessing
     {
-        public string GetCaptionKey(string textline)
+        private static readonly string pattern = @"(\w\d)*.{1,}-(\w\d)*.(-L999)\:";
+
+        public static  KeyValuePair<string, string> GetCaption(string line)
         {
-            string pattern = @"(\w\d)*.{ 1,}-(\w\d)*.(-L999)\:";
-            if (System.Text.RegularExpressions.Regex.IsMatch(textline, pattern))
-            {
-                string newtextline = System.Text.RegularExpressions.Regex.Match(textline, pattern).Value;
-                return newtextline;
-            }
-            else return "";
+            KeyValuePair<string, string> result = default(KeyValuePair<string, string>);
+            if (!Regex.IsMatch(line, pattern)) return result;
+
+            var key = Regex.Match(line, pattern).Value;
+            var value = line.Replace(key, "");
+            value = value.Replace("&", "").Replace("\"", "");
+            result = new KeyValuePair<string, string>(key, value);
+            return result;
         }
 
-        public string ReturnTextLineWithoutKey(string line)
+        public static string CleanInput(string input)
         {
-            string pattern = @"(\w\d)*.{ 1,}-(\w\d)*.(-L999)\:";
-            if (System.Text.RegularExpressions.Regex.IsMatch(line, pattern))
-            {
-            string pattern2 = System.Text.RegularExpressions.Regex.Match(line, pattern).Value;
-            string newline = line.Replace(pattern2 , "");
-                newline = newline.Replace("&","").Replace("\"","");
-                return newline;
-            }
-            else                        
-            return line;
+            var cleanedInput = input.Replace("\"", "");
+            return cleanedInput;
         }
-        public string CleanInput(string strIn)
-        {
-            // Replace invalid characters with empty strings.
-            try
-            {
-                string newpth = strIn.Replace("\"", "");
-                return @newpth ;
-               // return @Regex.Replace(strIn, '"', "",
-                //                     RegexOptions.None, TimeSpan.FromSeconds(1.5));
-            }
-            // If we timeout when replacing invalid characters, 
-            // we should return Empty.
-            catch (RegexMatchTimeoutException)
-            {
-                return String.Empty;
-            }
-        }
-        public string ConvertText(string langcode)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(langcode))
-                {
-                    if (langcode == "en")
-                        langcode = langcode + "-" + "us";
-                    else langcode = langcode + "-" + langcode;
 
-                    return langcode;
-                }
-                else
-                {
-                    throw new Exception("Null strings are not accepted!");
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("{0}", e.InnerException);
-            }
+        public static string GetLanguageCode(string languageCode)
+        {
+            if (string.IsNullOrWhiteSpace(languageCode))
+                throw new Exception("Null strings are not accepted!");
+
+            languageCode += string.Format("{0}{1}", "-", (languageCode == "en" ? "us" : languageCode));
+
+            return languageCode;
         }
     }
 }
