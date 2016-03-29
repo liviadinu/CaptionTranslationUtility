@@ -30,7 +30,7 @@ namespace CaptionTranslationUtility
             // E.g. "ar|en" language pair means to translate from Arabic to English</param>
             string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
             WebClient webClient = new WebClient();
-            webClient.Encoding = System.Text.Encoding.UTF8;
+            webClient.Encoding = System.Text.Encoding.Default;
 
             string result = webClient.DownloadString(url);//this throws 503 server unavailable at times
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
