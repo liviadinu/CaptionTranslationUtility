@@ -104,6 +104,7 @@ namespace CaptionTranslationUtility
             Console.WriteLine("Type caption: ...");
             string expression = Console.ReadLine();
             return expression;
+
         }
 
         private static string ReadInputFile()

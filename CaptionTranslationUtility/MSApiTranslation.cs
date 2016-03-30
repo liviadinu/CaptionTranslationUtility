@@ -28,22 +28,27 @@ namespace CaptionTranslationUtility
             // <param name="input">Input string</param>
             // <param name="languagePair">2 letter Language Pair, delimited by "|".
             // E.g. "ar|en" language pair means to translate from Arabic to English</param>
+            languagePair = languagePair.Replace("-","|");
             string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
-            WebClient webClient = new WebClient();
-            webClient.Encoding = System.Text.Encoding.Default;
 
-            string result = webClient.DownloadString(url);//this throws 503 server unavailable at times
+
+            ParentWebClient webClient = new ParentWebClient();
+            webClient.Encoding = System.Text.Encoding.Default;
+           
+            string result = webClient.DownloadString(url);
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
             string pattern2 = ">(.*?)<";
             try
             {
                 string parseresult = System.Text.RegularExpressions.Regex.Match(result, pattern1).Value;
                 string finalresult = System.Text.RegularExpressions.Regex.Match(parseresult, pattern2).Value;
-                finalresult = finalresult.Replace("<", "").Replace(">", "");
+                finalresult = finalresult.Replace("<", "").Replace(">", "") + " ___Google";
+                Console.WriteLine("{0}", finalresult);
                 return finalresult;
             }
             catch (Exception)
             {
+                Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
                 return "failed processing";
             }
 
