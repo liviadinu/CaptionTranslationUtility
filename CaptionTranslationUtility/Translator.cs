@@ -2,18 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Speech.Synthesis;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CaptionTranslationUtility
 {
     public class Translator
     {
         private MSApiTranslation apiTranslation;
-
         private Products products;
+        //private SpeechSynthesizer speaker;
+
         private static string fromXLang;
         private static string toXLang;
         private static string languagePair;
@@ -28,6 +28,7 @@ namespace CaptionTranslationUtility
                                             new TerminologyService.Version() { Name = "2013" } };
             products = new Products() { nav };
             apiTranslation = new MSApiTranslation();
+            //speaker = new SpeechSynthesizer();
 
             InitializeLanguages(languageCode);
         }
@@ -44,9 +45,13 @@ namespace CaptionTranslationUtility
         {
             if (string.IsNullOrWhiteSpace(caption)) return caption;
 
+            //speaker.Speak(caption);
+
             string outputTranslation = apiTranslation.InitServiceCall(caption, fromXLang, toXLang, products);
             if (string.IsNullOrEmpty(outputTranslation))
                 outputTranslation = apiTranslation.TranslateText(caption, languagePair);
+
+
 
             return outputTranslation;
         }
