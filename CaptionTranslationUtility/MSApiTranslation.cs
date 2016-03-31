@@ -10,14 +10,15 @@ namespace CaptionTranslationUtility
         private TranslationSources translationSources;
         private SearchStringComparison sensitivity;
 
-        public MSApiTranslation() {
+        public MSApiTranslation()
+        {
             // Create a collection to define the desired sources of translations 
             translationSources = new TranslationSources() { TranslationSource.Terms, TranslationSource.UiStrings };
 
             sensitivity = new SearchStringComparison();
 
             // Create the proxy for the Terminology Service SOAP client 
-            service = new TerminologyClient();            
+            service = new TerminologyClient();
         }
 
         public string TranslateText(string input, string languagePair)
@@ -28,9 +29,8 @@ namespace CaptionTranslationUtility
             // <param name="input">Input string</param>
             // <param name="languagePair">2 letter Language Pair, delimited by "|".
             // E.g. "ar|en" language pair means to translate from Arabic to English</param>
-            string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
-            WebClient webClient = new WebClient();
-            webClient.Encoding = System.Text.Encoding.Default;
+            string url = string.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
+            WebClient webClient = new WebClient() { Encoding = System.Text.Encoding.Default };
 
             string result = webClient.DownloadString(url);//this throws 503 server unavailable at times
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
@@ -42,11 +42,7 @@ namespace CaptionTranslationUtility
                 finalresult = finalresult.Replace("<", "").Replace(">", "");
                 return finalresult;
             }
-            catch (Exception)
-            {
-                return "failed processing";
-            }
-
+            catch (Exception) { return "failed processing"; }
         }
 
         public string InitServiceCall(string line, string fromLang, string toLang, Products products)
