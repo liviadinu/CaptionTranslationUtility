@@ -10,14 +10,15 @@ namespace CaptionTranslationUtility
         private TranslationSources translationSources;
         private SearchStringComparison sensitivity;
 
-        public MSApiTranslation() {
+        public MSApiTranslation()
+        {
             // Create a collection to define the desired sources of translations 
             translationSources = new TranslationSources() { TranslationSource.Terms, TranslationSource.UiStrings };
 
             sensitivity = new SearchStringComparison();
 
             // Create the proxy for the Terminology Service SOAP client 
-            service = new TerminologyClient();            
+            service = new TerminologyClient();
         }
 
         public string TranslateText(string input, string languagePair)
@@ -29,12 +30,8 @@ namespace CaptionTranslationUtility
             // <param name="languagePair">2 letter Language Pair, delimited by "|".
             // E.g. "ar|en" language pair means to translate from Arabic to English</param>
             languagePair = languagePair.Replace("-","|");
-            string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
-
-
-            ParentWebClient webClient = new ParentWebClient();
-            webClient.Encoding = System.Text.Encoding.Default;
-           
+            string url = string.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
+            ParentWebClient webClient = new ParentWebClient(){ Encoding = System.Text.Encoding.Default };
             string result = webClient.DownloadString(url);
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
             string pattern2 = ">(.*?)<";
@@ -46,10 +43,9 @@ namespace CaptionTranslationUtility
                 Console.WriteLine("{0}", finalresult);
                 return finalresult;
             }
-            catch (Exception)
-            {
-                Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
-                return "failed processing";
+            catch (Exception) { 
+            	Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
+            	return "failed processing"; 
             }
 
         }
