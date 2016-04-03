@@ -1,7 +1,6 @@
 ﻿using CaptionTranslationUtility.Enums;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace CaptionTranslationUtility
@@ -15,7 +14,12 @@ namespace CaptionTranslationUtility
             var selectedOption = ReadSelectedOption();
             switch (selectedOption)
             {
-                case 1: return;
+                case 1:
+                    {
+                        PrivateDictionary dictionary = new PrivateDictionary();                        
+                        dictionary.AddOrUpdateDictionary(ReadTranslationLanguage(), ReadInputFile());
+                    }
+                    return;
                 case 2:
                     Translate(TranslationEntity.File);
                     return;
@@ -33,7 +37,7 @@ namespace CaptionTranslationUtility
                 "1. Load a dictionary .txt file",
                 "2. Translate captions from .txt file",
                 "3. Translate single word ",
-                "4. Exit"
+                "4. Exit",
             };
 
             Console.Out.NewLine = "\r\n\r\n ";
@@ -122,5 +126,6 @@ namespace CaptionTranslationUtility
             var outputFilePath = string.Format("{0}\\Translated_{1}", directory, filename);
             return outputFilePath;
         }
+
     }
 }

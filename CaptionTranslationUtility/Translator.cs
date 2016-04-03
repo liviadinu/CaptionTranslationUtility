@@ -2,16 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CaptionTranslationUtility
 {
     public class Translator
     {
         private MSApiTranslation apiTranslation;
+        private PrivateDictionary dictionaryTranslation;
 
         private Products products;
         private static string fromXLang;
@@ -28,6 +27,7 @@ namespace CaptionTranslationUtility
                                             new TerminologyService.Version() { Name = "2013" } };
             products = new Products() { nav };
             apiTranslation = new MSApiTranslation();
+            dictionaryTranslation = new PrivateDictionary();
 
             InitializeLanguages(languageCode);
         }
@@ -44,10 +44,21 @@ namespace CaptionTranslationUtility
         {
             if (string.IsNullOrWhiteSpace(caption)) return caption;
 
-            string outputTranslation = apiTranslation.InitServiceCall(caption, fromXLang, toXLang, products);
+            string outputTranslation = dictionaryTranslation.ReturnDictionaryTranslation(dictionaryTranslation.LoadResourceFileContentInHashtable(dictionaryTranslation.ReturnResourcePath(languagePair)), caption);
             if (string.IsNullOrEmpty(outputTranslation))
-                outputTranslation = apiTranslation.TranslateText(caption, languagePair);
+            {
+                string outputTranslation2 = apiTranslation.InitServiceCall(caption, fromXLang, toXLang, products);
 
+                if (string.IsNullOrEmpty(outputTranslation2))
+                {
+                    outputTranslation2 = apiTranslation.TranslateText(caption, languagePair);
+                    outputTranslation = outputTranslation2;
+                }
+                else
+                {
+                    outputTranslation = outputTranslation2;
+                }
+            }
             return outputTranslation;
         }
 
@@ -65,16 +76,6 @@ namespace CaptionTranslationUtility
             catch (ArgumentException) { throw; }
 
             var output = new StreamWriter(outputFilePath);
-            //string streamline;
-            //while ((streamline = input.ReadLine()) != null)
-            //{
-            //    if (!string.IsNullOrWhiteSpace(streamline))
-            //    {
-            //        var keyCaption = TextProcessing.GetCaption(streamline);
-            //        var translation = keyCaption.Key + Translate(keyCaption.Value);
-            //        output.WriteLine(translation);
-            //    }
-            //}
 
             foreach (var line in fileLines)
             {
