@@ -146,12 +146,18 @@ namespace CaptionTranslationUtility
         }
         public string ReturnDictionaryTranslation(Hashtable dictionaryData, string index)
         {
-            if (dictionaryData.ContainsKey(index))
+            string translatedWord = "";
+            foreach (DictionaryEntry de in dictionaryData)
             {
-                return dictionaryData.Values.ToString();
+                if (de.Key as string == index)
+                {
+                    return translatedWord = de.Value.ToString();                    
+                }
+                else continue;               
             }
-            else return "";
+            return translatedWord;
         }
+
         public string ReturnResourcePath(string code)
         {
             if (!string.IsNullOrWhiteSpace(code))
