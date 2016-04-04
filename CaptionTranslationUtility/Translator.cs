@@ -11,6 +11,7 @@ namespace CaptionTranslationUtility
     {
         private MSApiTranslation apiTranslation;
         private PrivateDictionary dictionaryTranslation;
+        private string outputTranslation;
 
         private Products products;
         private static string fromXLang;
@@ -44,22 +45,28 @@ namespace CaptionTranslationUtility
         {
             if (string.IsNullOrWhiteSpace(caption)) return caption;
 
-            string outputTranslation = dictionaryTranslation.ReturnDictionaryTranslation(dictionaryTranslation.LoadResourceFileContentInHashtable(dictionaryTranslation.ReturnResourcePath(languagePair)), caption);
+            if (File.Exists(dictionaryTranslation.ReturnResourcePath(languagePair)))
+            {
+                string outputTranslation = dictionaryTranslation.ReturnDictionaryTranslation(dictionaryTranslation.LoadResourceFileContentInHashtable(dictionaryTranslation.ReturnResourcePath(languagePair)), caption);
+            }
+            else outputTranslation = null;
+
+
             if (string.IsNullOrEmpty(outputTranslation))
             {
-                string outputTranslation2 = apiTranslation.InitServiceCall(caption, fromXLang, toXLang, products);
+                string outputTranslation = apiTranslation.InitServiceCall(caption, fromXLang, toXLang, products);
 
-                if (string.IsNullOrEmpty(outputTranslation2))
+                if (string.IsNullOrEmpty(outputTranslation))
                 {
-                    outputTranslation2 = apiTranslation.TranslateText(caption, languagePair);
-                    outputTranslation = outputTranslation2;
+                    outputTranslation = apiTranslation.TranslateText(caption, languagePair);
+                    
                 }
                 else
                 {
-                    outputTranslation = outputTranslation2;
+                    return outputTranslation;
                 }
             }
-            return outputTranslation;
+           return outputTranslation;
         }
 
         public void TranslateCaptionsFromFile(string inputFilePath, string outputFilePath)

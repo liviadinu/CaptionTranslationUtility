@@ -34,7 +34,7 @@ namespace CaptionTranslationUtility
 
             ParentWebClient webClient = new ParentWebClient();
             webClient.Encoding = System.Text.Encoding.Default;
-           
+            webClient.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
             string result = webClient.DownloadString(url);
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
             string pattern2 = ">(.*?)<";
