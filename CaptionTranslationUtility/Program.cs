@@ -17,6 +17,7 @@ namespace CaptionTranslationUtility
             {
                 ShowMenu();
                 selectedOption = ProcessSelectedOption();
+
             }
         }
 
@@ -47,7 +48,9 @@ namespace CaptionTranslationUtility
             var menuOption = (MenuOption)selectedOption;
             switch (menuOption)
             {
-                case MenuOption.LoadDictionary: break;
+                case MenuOption.LoadDictionary:
+                    LoadDictionary();
+                    break;
                 case MenuOption.TranslateFile:
                     Translate(TranslationEntity.File);
                     break;
@@ -85,6 +88,12 @@ namespace CaptionTranslationUtility
             translator.Close();
         }
 
+        private static void LoadDictionary()
+        {
+            PrivateDictionary dictionary = new PrivateDictionary();
+            dictionary.AddOrUpdateDictionary(ReadTranslationLanguage(), ReadInputFile());
+        }
+
         private static void TranslateCaptionsFromFile(MasterTranslator translator)
         {
             string inputFilePath = ReadInputFile();
@@ -110,7 +119,7 @@ namespace CaptionTranslationUtility
         }
 
         private static LanguagePair GetLanguagePair()
-        {            
+        {
             var languagePair = default(LanguagePair);
             var isRead = false;
 
@@ -158,5 +167,6 @@ namespace CaptionTranslationUtility
             var outputFilePath = Path.Combine(directory, string.Format("{0}_{1}_{2}{3}", filename, languagePair.GetLanguagePair(), DateTime.Now.ToString("ddmmyy_HHMM"), extension));
             return outputFilePath;
         }
+
     }
 }
