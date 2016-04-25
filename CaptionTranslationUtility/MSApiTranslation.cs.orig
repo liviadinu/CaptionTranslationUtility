@@ -29,9 +29,18 @@ namespace CaptionTranslationUtility
             // <param name="input">Input string</param>
             // <param name="languagePair">2 letter Language Pair, delimited by "|".
             // E.g. "ar|en" language pair means to translate from Arabic to English</param>
+<<<<<<< HEAD
             languagePair = languagePair.Replace("-","|");
+            string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
+=======
             string url = string.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", input, languagePair);
-            ParentWebClient webClient = new ParentWebClient(){ Encoding = System.Text.Encoding.Default };
+            WebClient webClient = new WebClient() { Encoding = System.Text.Encoding.Default };
+>>>>>>> 0bd3b13040af0d1d4055ae062aaf62bcffc8c28b
+
+
+            ParentWebClient webClient = new ParentWebClient();
+            webClient.Encoding = System.Text.Encoding.Default;
+           
             string result = webClient.DownloadString(url);
             string pattern1 = "<" + "\\s*" + "\\/?\\s*span title=" + '"' + input + '"' + "\\s*.*?>(<)";
             string pattern2 = ">(.*?)<";
@@ -43,11 +52,16 @@ namespace CaptionTranslationUtility
                 Console.WriteLine("{0}", finalresult);
                 return finalresult;
             }
-            catch (Exception) { 
-            	Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
-            	return "failed processing"; 
+<<<<<<< HEAD
+            catch (Exception)
+            {
+                Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
+                return "failed processing";
             }
 
+=======
+            catch (Exception) { return "failed processing"; }
+>>>>>>> 0bd3b13040af0d1d4055ae062aaf62bcffc8c28b
         }
 
         public string InitServiceCall(string line, string fromLang, string toLang, Products products)

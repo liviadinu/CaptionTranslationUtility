@@ -1,7 +1,9 @@
-﻿using CaptionTranslationUtility.Enums;
+﻿using CaptionTranslationUtility.Base;
+using CaptionTranslationUtility.Enums;
+using CaptionTranslationUtility.Helpers;
+using CaptionTranslationUtility.Translator;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace CaptionTranslationUtility
@@ -10,35 +12,51 @@ namespace CaptionTranslationUtility
     {
         static void Main(string[] args)
         {
-            ShowMenu();
-
-            var selectedOption = ReadSelectedOption();
-            switch (selectedOption)
+            MenuOption selectedOption = default(MenuOption);
+            while (selectedOption != MenuOption.Exit)
             {
-                case 1: return;
-                case 2:
-                    Translate(TranslationEntity.File);
-                    return;
-                case 3:
-                    Translate(TranslationEntity.Caption);
-                    return;
-                case 4: return;
+                ShowMenu();
+                selectedOption = ProcessSelectedOption();
             }
         }
 
         private static void ShowMenu()
         {
-            List<string> messages = new List<string>{
+            List<string> messages = new List<string> {
                 "Choose an action :",
-                "1. Load a dictionary .txt file",
-                "2. Translate captions from .txt file",
-                "3. Translate single word ",
-                "4. Exit"
+                string.Format("{0}. Load a dictionary .txt file", (int)MenuOption.LoadDictionary),
+                string.Format("{0}. Translate captions from .txt file", (int)MenuOption.TranslateFile),
+                string.Format("{0}. Translate single word", (int)MenuOption.TranslateWord),
+                string.Format("{0}. Exit", (int)MenuOption.Exit)
             };
 
             Console.Out.NewLine = "\r\n\r\n ";
 
             messages.ForEach(m => Console.WriteLine(m));
+        }
+
+        private static MenuOption ProcessSelectedOption()
+        {
+            var selectedOption = ReadSelectedOption();
+            while (!Enum.IsDefined(typeof(MenuOption), selectedOption))
+            {
+                Console.WriteLine("Invalid option! Please select another option.");
+                selectedOption = ReadSelectedOption();
+            }
+
+            var menuOption = (MenuOption)selectedOption;
+            switch (menuOption)
+            {
+                case MenuOption.LoadDictionary: break;
+                case MenuOption.TranslateFile:
+                    Translate(TranslationEntity.File);
+                    break;
+                case MenuOption.TranslateWord:
+                    Translate(TranslationEntity.Caption);
+                    break;
+                case MenuOption.Exit: break;
+            }
+            return menuOption;
         }
 
         private static int ReadSelectedOption()
@@ -55,8 +73,8 @@ namespace CaptionTranslationUtility
 
         private static void Translate(TranslationEntity entity)
         {
-            var languageCode = ReadTranslationLanguage();
-            var translator = new Translator(languageCode);
+            var languagePair = GetLanguagePair();
+            var translator = new MasterTranslator(languagePair);
 
             switch (entity)
             {
@@ -64,31 +82,48 @@ namespace CaptionTranslationUtility
                 case TranslationEntity.File: TranslateCaptionsFromFile(translator); return;
             }
 
-            translator.CloseTerminologyClientService();
+            translator.Close();
         }
 
-        private static void TranslateCaptionsFromFile(Translator translator)
+        private static void TranslateCaptionsFromFile(MasterTranslator translator)
         {
             string inputFilePath = ReadInputFile();
-            string outputFilePath = GetOutputFilePath(inputFilePath);
+            string outputFilePath = GetOutputFilePath(inputFilePath, translator.LanguagePair);
 
-            translator.TranslateCaptionsFromFile(inputFilePath, outputFilePath);
+            translator.TranslateFile(inputFilePath, outputFilePath);
 
             //Process.Start(outputFilePath);
         }
 
-        private static void TranslateCaption(Translator translator)
+        private static void TranslateCaption(MasterTranslator translator)
         {
             if (translator == null) return;
 
             var caption = ReadCaption();
             if (string.IsNullOrWhiteSpace(caption)) return;
 
-            var captionTranslation = translator.Translate(caption);
+            var captionTranslation = translator.TranslateParallelized(caption);
             if (!string.IsNullOrWhiteSpace(captionTranslation))
                 Console.WriteLine(captionTranslation);
 
             TranslateCaption(translator);
+        }
+
+        private static LanguagePair GetLanguagePair()
+        {            
+            var languagePair = default(LanguagePair);
+            var isRead = false;
+
+            while (!isRead || !languagePair.IsValid)
+            {
+                if (isRead)
+                    Console.WriteLine("Type as valid language code pair");
+
+                var languageCode = ReadTranslationLanguage();
+                isRead = true;
+                languagePair = new LanguagePair(languageCode);
+            }
+            return languagePair;
         }
 
         private static string ReadTranslationLanguage()
@@ -104,22 +139,23 @@ namespace CaptionTranslationUtility
             Console.WriteLine("Type caption: ...");
             string expression = Console.ReadLine();
             return expression;
-
         }
 
         private static string ReadInputFile()
         {
             Console.WriteLine("Input text full path...");
-            string inputFilePath = TextProcessing.CleanInput(Console.ReadLine());
+            var filePath = Console.ReadLine();
+            string inputFilePath = filePath.Clean(new List<string> { "\"" }, "");
             return inputFilePath;
         }
 
-        private static string GetOutputFilePath(string inputFilePath)
+        private static string GetOutputFilePath(string inputFilePath, LanguagePair languagePair)
         {
             string directory = Path.GetDirectoryName(inputFilePath);
-            string filename = Path.GetFileName(inputFilePath);
+            string filename = Path.GetFileNameWithoutExtension(inputFilePath);
+            string extension = Path.GetExtension(inputFilePath);
 
-            var outputFilePath = string.Format("{0}\\Translated_{1}", directory, filename);
+            var outputFilePath = Path.Combine(directory, string.Format("{0}_{1}_{2}{3}", filename, languagePair.GetLanguagePair(), DateTime.Now.ToString("ddmmyy_HHMM"), extension));
             return outputFilePath;
         }
     }
