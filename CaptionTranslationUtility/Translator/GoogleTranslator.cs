@@ -53,7 +53,7 @@ namespace CaptionTranslationUtility.Translator
             {
                 Console.WriteLine("{0},{1}", "GOOGLE", "Failed Processing");
             }
-            return translation;
+            return string.Format("{0}__{1}",translation, TranslatorType.ToString());
         }
     }
 }
